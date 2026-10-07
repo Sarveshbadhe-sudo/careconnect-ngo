@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 text-white py-24 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="space-y-6">
+            <span class="inline-block bg-teal-500/20 border border-teal-400/30 text-teal-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                <i class="fa-solid fa-sparkles mr-1.5"></i> Every Rupee Feeds a Family
+            </span>
+            <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
+                Empowering Lives with <span class="text-teal-400">Nutrition</span> and Hope.
+            </h1>
+            <p class="text-slate-300 text-lg leading-relaxed max-w-xl">
+                Aashray Seva serves over 24,000+ nutritious meals to municipal school students, patients, and marginalized communities.
+            </p>
+            <div class="flex flex-wrap gap-4 pt-2">
+                <a href="{{ url_for('donor.donate') }}" class="bg-teal-500 hover:bg-teal-600 text-slate-950 px-8 py-3.5 rounded-xl font-extrabold text-lg shadow-lg shadow-teal-500/30 transition">
+                    Contribute Now
+                </a>
+                <a href="#events" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-7 py-3.5 rounded-xl font-bold transition">
+                    Explore Drives
+                </a>
+            </div>
+        </div>
+        <!-- Live Impact Metric Cards -->
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                <i class="fa-solid fa-bowl-food text-3xl text-teal-400 mb-3"></i>
+                <div class="text-3xl font-black">{{ (total_meals + 24500) | format }}</div>
+                <div class="text-sm text-slate-300 font-medium">Meals Served</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                <i class="fa-solid fa-users text-3xl text-amber-400 mb-3"></i>
+                <div class="text-3xl font-black">{{ (total_donors + 140) | format }}</div>
+                <div class="text-sm text-slate-300 font-medium">Active Donors</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                <i class="fa-solid fa-indian-rupee-sign text-3xl text-emerald-400 mb-3"></i>
+                <div class="text-3xl font-black">₹{{ (total_funds + 125000) | format }}</div>
+                <div class="text-sm text-slate-300 font-medium">Raised Directly</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                <i class="fa-solid fa-calendar-check text-3xl text-sky-400 mb-3"></i>
+                <div class="text-3xl font-black">102+</div>
+                <div class="text-sm text-slate-300 font-medium">Successful Drives</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Donor Recognition Feed -->
+<section class="bg-teal-50 py-6 border-b border-teal-100">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <span class="w-3 h-3 bg-teal-500 rounded-full animate-ping"></span>
+            <span class="font-bold text-slate-800 text-sm uppercase tracking-wider">Live Givers Wall:</span>
+        </div>
+        <div class="flex flex-wrap gap-4 text-xs font-semibold text-slate-700">
+            {% for d in recent_donations %}
+                <div class="bg-white px-3 py-1.5 rounded-full border border-teal-200 shadow-sm flex items-center gap-2">
+                    <span class="w-6 h-6 bg-teal-600 text-white rounded-full flex items-center justify-center text-[10px]">{{ d.donor_name[:1] }}</span>
+                    <span>{{ d.donor_name }} funded <b>{{ d.meals_funded }} meals</b> (₹{{ d.amount | int }})</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Causes Section -->
+<section id="causes" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="text-teal-600 font-bold tracking-wider uppercase text-xs">Targeted Interventions</span>
+        <h2 class="text-3xl font-black text-slate-800 mt-2">Our Key Pillars of Impact</h2>
+        <p class="text-slate-600 text-sm mt-3">From morning nutritional security in municipal schools to healthcare relief, explore how your donations create quantifiable difference.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Cause 1 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition">
+            <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&auto=format&fit=crop&q=80" class="h-48 w-full object-cover" alt="Bal Shiksha">
+            <div class="p-6">
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">School Meals</span>
+                <h3 class="text-xl font-bold mt-3 text-slate-800">Bal Shiksha Ahara</h3>
+                <p class="text-slate-600 text-sm mt-2">Provides daily warm, freshly cooked nutrition to municipal school students, boosting primary school attendance by 22%.</p>
+                <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+                    <span class="text-xs text-slate-500 font-semibold">Cost: ₹25 / nutritious meal</span>
+                    <a href="{{ url_for('donor.donate') }}" class="text-teal-600 font-bold hover:underline text-sm">Sponsor &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cause 2 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition">
+            <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=600&auto=format&fit=crop&q=80" class="h-48 w-full object-cover" alt="Swasthya Ahara">
+            <div class="p-6">
+                <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Hospital Support</span>
+                <h3 class="text-xl font-bold mt-3 text-slate-800">Swasthya Ahara</h3>
+                <p class="text-slate-600 text-sm mt-2">Serving warm meals and fruit rations to family members and attendants waiting tirelessly outside government medical colleges.</p>
+                <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+                    <span class="text-xs text-slate-500 font-semibold">Cost: ₹50 / nutrition kit</span>
+                    <a href="{{ url_for('donor.donate') }}" class="text-teal-600 font-bold hover:underline text-sm">Sponsor &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cause 3 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition">
+            <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600&auto=format&fit=crop&q=80" class="h-48 w-full object-cover" alt="Winter Blanket">
+            <div class="p-6">
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Winter Relief</span>
+                <h3 class="text-xl font-bold mt-3 text-slate-800">Winter Blanket Drive</h3>
+                <p class="text-slate-600 text-sm mt-2">Delivering quality insulated thermal blankets to unsheltered elders and street-dwelling children during drop in temperatures.</p>
+                <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+                    <span class="text-xs text-slate-500 font-semibold">Cost: ₹250 / blanket</span>
+                    <a href="{{ url_for('donor.donate') }}" class="text-teal-600 font-bold hover:underline text-sm">Sponsor &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Events Section (Upcoming & Past Gallery) -->
+<section id="events" class="py-20 bg-slate-100 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-end mb-12">
+            <div>
+                <span class="text-teal-600 font-bold uppercase text-xs">Community Engagement</span>
+                <h2 class="text-3xl font-black text-slate-800 mt-1">Upcoming Volunteer Drives</h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+            {% for ev in upcoming_events %}
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6">
+                    <img src="{{ ev.image_url }}" class="w-full md:w-44 h-44 rounded-xl object-cover" alt="{{ ev.title }}">
+                    <div class="flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-teal-600 uppercase tracking-wider">{{ ev.category }}</span>
+                            <h3 class="text-lg font-bold text-slate-800 mt-1">{{ ev.title }}</h3>
+                            <p class="text-xs text-slate-600 mt-2">{{ ev.description }}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                            <div><i class="fa-regular fa-calendar mr-1"></i> {{ ev.date }}</div>
+                            <div><i class="fa-solid fa-location-dot mr-1"></i> {{ ev.venue }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <h3 class="text-2xl font-black text-slate-800 mb-6">Past Events Photo Highlights</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for ev in completed_events %}
+                <div class="relative group overflow-hidden rounded-2xl shadow-sm border border-slate-200 bg-white">
+                    <img src="{{ ev.image_url }}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300" alt="{{ ev.title }}">
+                    <div class="p-4">
+                        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase">Completed</span>
+                        <h4 class="font-bold text-slate-800 mt-1 text-sm">{{ ev.title }}</h4>
+                        <p class="text-xs text-slate-500 mt-1">{{ ev.venue }} • {{ ev.date }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

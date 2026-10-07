@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Sign In | Aashray Seva{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-20">
+    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+        <h2 class="text-2xl font-black text-slate-800 text-center mb-6">Access Portal</h2>
+        <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Email Address</label>
+                <input type="email" name="email" required placeholder="donor@gmail.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-teal-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Password</label>
+                <input type="password" name="password" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-teal-500">
+            </div>
+            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl transition">Sign In</button>
+        </form>
+        <div class="mt-6 text-center text-xs text-slate-500">
+            New to Aashray Seva? <a href="{{ url_for('auth.register') }}" class="text-teal-600 font-bold hover:underline">Register here</a>
+        </div>
+        <div class="mt-4 p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 text-center border border-slate-100">
+            <b>Admin Demo Credentials:</b> admin@aashray.ngo / admin123
+        </div>
+    </div>
+</div>
+{% endblock %}

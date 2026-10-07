@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}My Donor Dashboard | Aashray Seva{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800">Welcome, {{ user.full_name }}</h1>
+            <p class="text-slate-500 text-sm">Track your past contributions and download 80G certificates.</p>
+        </div>
+        <a href="{{ url_for('donor.donate') }}" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition">Make New Donation</a>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200">
+            <span class="text-xs font-bold text-slate-400 uppercase">Lifetime Contributions</span>
+            <div class="text-3xl font-black text-slate-800 mt-2">₹{{ total_donated | format }}</div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200">
+            <span class="text-xs font-bold text-slate-400 uppercase">Total Impact Created</span>
+            <div class="text-3xl font-black text-teal-600 mt-2">{{ total_meals }} Meals Funded</div>
+        </div>
+    </div>
+
+    <!-- Past Donations Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div class="p-6 border-b border-slate-100">
+            <h2 class="font-bold text-slate-800">Your Donation History</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200">
+                    <tr>
+                        <th class="p-4">Receipt ID</th>
+                        <th class="p-4">Cause</th>
+                        <th class="p-4">Amount</th>
+                        <th class="p-4">Meals Funded</th>
+                        <th class="p-4">Date</th>
+                        <th class="p-4 text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for d in donations %}
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-4 font-mono font-bold text-xs">{{ d.receipt_id }}</td>
+                            <td class="p-4 font-semibold">{{ d.category }}</td>
+                            <td class="p-4 font-bold">₹{{ d.amount | int }}</td>
+                            <td class="p-4 text-teal-600 font-bold">{{ d.meals_funded }}</td>
+                            <td class="p-4 text-slate-400 text-xs">{{ d.created_at.strftime('%d-%b-%Y') }}</td>
+                            <td class="p-4 text-center">
+                                <a href="{{ url_for('donor.download_pdf', receipt_id=d.receipt_id) }}" class="text-teal-600 font-bold hover:underline text-xs">
+                                    <i class="fa-solid fa-file-pdf mr-1"></i> Download Receipt
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-slate-400">No donations made yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

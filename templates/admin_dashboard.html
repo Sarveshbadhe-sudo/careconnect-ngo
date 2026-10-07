@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block title %}Admin Analytics & Control | Aashray Seva{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800">Admin Central Dashboard</h1>
+            <p class="text-slate-500 text-sm mt-1">Live overview of collections, tax certificates, and event schedules.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{{ url_for('admin.export_csv') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md transition flex items-center gap-2">
+                <i class="fa-solid fa-file-csv"></i> Export Donations (CSV)
+            </a>
+            <button onclick="document.getElementById('addEventModal').classList.remove('hidden')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> Add Event
+            </button>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Gross Contributions</span>
+            <div class="text-3xl font-black text-slate-800 mt-2">₹{{ total_funds | format }}</div>
+            <span class="text-xs text-emerald-600 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> 100% Tax Compliant</span>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Registered Donors</span>
+            <div class="text-3xl font-black text-slate-800 mt-2">{{ total_donors }}</div>
+            <span class="text-xs text-slate-500">Across web portal</span>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Nutrition Units</span>
+            <div class="text-3xl font-black text-teal-600 mt-2">{{ total_meals }} Meals</div>
+            <span class="text-xs text-teal-600 font-bold">@ ₹25 standard unit cost</span>
+        </div>
+    </div>
+
+    <!-- Chart.js Analytics Section -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-10">
+        <h2 class="text-lg font-bold text-slate-800 mb-4">Donation Allocation by Cause</h2>
+        <div class="h-64">
+            <canvas id="categoryChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Master Donations Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-12">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h2 class="font-bold text-slate-800">Master Donation Log</h2>
+            <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold">{{ donations|length }} Total Transactions</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+                <thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200">
+                    <tr>
+                        <th class="p-4">Receipt</th>
+                        <th class="p-4">Donor</th>
+                        <th class="p-4">Initiative</th>
+                        <th class="p-4">Amount</th>
+                        <th class="p-4">Meals</th>
+                        <th class="p-4">Mode</th>
+                        <th class="p-4">Date</th>
+                        <th class="p-4 text-center">Receipt</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for d in donations %}
+                        <tr class="hover:bg-slate-50/80">
+                            <td class="p-4 font-mono font-bold text-xs text-slate-700">{{ d.receipt_id }}</td>
+                            <td class="p-4 font-bold text-slate-800">{{ d.donor_name }}</td>
+                            <td class="p-4">{{ d.category }}</td>
+                            <td class="p-4 font-bold text-slate-900">₹{{ d.amount | int }}</td>
+                            <td class="p-4 text-teal-600 font-bold">{{ d.meals_funded }}</td>
+                            <td class="p-4 text-xs">{{ d.payment_method }}</td>
+                            <td class="p-4 text-xs text-slate-400">{{ d.created_at.strftime('%d-%b-%Y') }}</td>
+                            <td class="p-4 text-center">
+                                <a href="{{ url_for('donor.download_pdf', receipt_id=d.receipt_id) }}" class="text-teal-600 hover:text-teal-800 font-bold text-xs"><i class="fa-solid fa-download"></i> PDF</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Event Management Controls -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h2 class="font-bold text-slate-800 mb-4">Manage NGO Campaigns & Drives</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for ev in events %}
+                <div class="border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase
+                                {% if ev.status == 'upcoming' %} bg-teal-100 text-teal-800 {% else %} bg-slate-100 text-slate-700 {% endif %}">
+                                {{ ev.status }}
+                            </span>
+                            <form action="{{ url_for('admin.delete_event', event_id=ev.id) }}" method="POST">
+                                <button type="submit" class="text-rose-500 hover:text-rose-700 text-xs font-bold">&times; Remove</button>
+                            </form>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm mt-2">{{ ev.title }}</h4>
+                        <p class="text-xs text-slate-500 mt-1">{{ ev.venue }} • {{ ev.date }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Event Modal -->
+<div id="addEventModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg text-slate-800">Add Campaign or Drive</h3>
+            <button onclick="document.getElementById('addEventModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
+        </div>
+        <form action="{{ url_for('admin.add_event') }}" method="POST" class="space-y-3">
+            <input type="text" name="title" required placeholder="Event Title" class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm">
+            <input type="text" name="category" required placeholder="Category (e.g. Nutrition, Relief)" class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm">
+            <input type="text" name="venue" required placeholder="Venue / Location" class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm">
+            <input type="date" name="date" required class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm">
+            <textarea name="description" required placeholder="Brief description of the drive" class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm"></textarea>
+            <input type="url" name="image_url" required placeholder="Banner Image URL" class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm">
+            <select name="status" class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm">
+                <option value="upcoming">Upcoming</option>
+                <option value="completed">Completed (Photo Highlight)</option>
+            </select>
+            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl mt-2">Publish Event</button>
+        </form>
+    </div>
+</div>
+
+<!-- Chart.js Initialization Script -->
+<script>
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels | tojson }},
+            datasets: [{
+                label: 'Funds Raised (INR)',
+                data: {{ chart_values | tojson }},
+                backgroundColor: ['#0d9488', '#f59e0b', '#6366f1', '#10b981'],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+</script>
+{% endblock %}

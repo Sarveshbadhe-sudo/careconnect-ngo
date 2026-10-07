@@ -1,45 +1,32 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register - Donation Management System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-
-<body>
-
-<div class="container">
-
-    <h1>Create Account</h1>
-
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <p class="message">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <form method="POST">
-
-        <label>Name</label>
-        <input type="text" name="name" required>
-
-        <label>Email</label>
-        <input type="email" name="email" required>
-
-        <label>Password</label>
-        <input type="password" name="password" required>
-
-        <button type="submit">Register</button>
-
-    </form>
-
-    <p>
-        Already registered?
-        <a href="{{ url_for('login') }}">Login</a>
-    </p>
-
+{% extends 'base.html' %}
+{% block title %}Create Donor Account | Aashray Seva{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16">
+    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+        <h2 class="text-2xl font-black text-slate-800 text-center mb-6">Donor Registration</h2>
+        <form action="{{ url_for('auth.register') }}" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Full Legal Name</label>
+                <input type="text" name="full_name" required placeholder="Sahil Manohar Desale" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-teal-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Email Address</label>
+                <input type="email" name="email" required placeholder="sahil@example.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-teal-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Phone Number</label>
+                <input type="tel" name="phone" placeholder="9820012345" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-teal-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">PAN Number (For 80G Receipts)</label>
+                <input type="text" name="pan_number" placeholder="ABCDE1234F" maxlength="10" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm uppercase focus:outline-teal-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Password</label>
+                <input type="password" name="password" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-teal-500">
+            </div>
+            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl transition">Create Account</button>
+        </form>
+    </div>
 </div>
-
-</body>
-</html>
+{% endblock %}

@@ -1,208 +1,128 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-import sqlite3
-import os
+"""App initialization, blueprint registration, and default mock seed data."""
+from flask import Flask, render_template
+from werkzeug.security import generate_password_hash
+from models import db, User, Donation, Event
+from routes_auth import auth_bp
+from routes_donor import donor_bp
+from routes_admin import admin_bp
 
 app = Flask(__name__)
-app.secret_key = "donation_management_secret_key"
+app.config['SECRET_KEY'] = 'aashray-seva-key-sies-gst-mini-project-2026'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aashray_seva.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-DATABASE = "database.db"
+db.init_app(app)
 
+app.register_blueprint(auth_bp)
+app.register_blueprint(donor_bp)
+app.register_blueprint(admin_bp)
 
-# ---------------- DATABASE CONNECTION ----------------
+@app.route('/')
+def public_index():
+    upcoming_events = Event.query.filter_by(status='upcoming').limit(3).all()
+    completed_events = Event.query.filter_by(status='completed').limit(6).all()
+    recent_donations = Donation.query.order_by(Donation.created_at.desc()).limit(5).all()
+    
+    total_funds = sum(d.amount for d in Donation.query.all())
+    total_meals = sum(d.meals_funded for d in Donation.query.all())
+    total_donors = User.query.filter_by(role='user').count()
 
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return render_template(
+        'index.html',
+        upcoming_events=upcoming_events,
+        completed_events=completed_events,
+        recent_donations=recent_donations,
+        total_funds=total_funds,
+        total_meals=total_meals,
+        total_donors=total_donors
+    )
 
-
-# ---------------- DATABASE INITIALIZATION ----------------
-
-def init_db():
-    conn = get_db_connection()
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'donor'
-        )
-    """)
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS donations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            donor_name TEXT NOT NULL,
-            category TEXT NOT NULL,
-            amount REAL NOT NULL,
-            date TEXT NOT NULL
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
-
-# ---------------- LOGIN ----------------
-
-@app.route("/", methods=["GET", "POST"])
-def login():
-
-    if request.method == "POST":
-
-        email = request.form["email"]
-        password = request.form["password"]
-
-        conn = get_db_connection()
-
-        user = conn.execute(
-            "SELECT * FROM users WHERE email = ? AND password = ?",
-            (email, password)
-        ).fetchone()
-
-        conn.close()
-
-        if user:
-
-            session["user_id"] = user["id"]
-            session["name"] = user["name"]
-            session["role"] = user["role"]
-
-            if user["role"] == "admin":
-                return redirect(url_for("admin"))
-
-            return redirect(url_for("donate"))
-
-        flash("Invalid email or password")
-
-    return render_template("login.html")
-
-
-# ---------------- REGISTRATION ----------------
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-
-    if request.method == "POST":
-
-        name = request.form["name"]
-        email = request.form["email"]
-        password = request.form["password"]
-
-        conn = get_db_connection()
-
-        try:
-            conn.execute(
-                "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-                (name, email, password, "donor")
+def seed_database():
+    with app.app_context():
+        db.create_all()
+        # Seed Admin
+        if not User.query.filter_by(email='admin@aashray.ngo').first():
+            admin = User(
+                full_name='System Administrator',
+                email='admin@aashray.ngo',
+                phone='9876543210',
+                role='admin',
+                password_hash=generate_password_hash('admin123')
             )
+            donor = User(
+                full_name='Sahil Manohar Desale',
+                email='sahil@gmail.com',
+                phone='9820123456',
+                pan_number='ABCDE1234F',
+                role='user',
+                password_hash=generate_password_hash('sahil123')
+            )
+            db.session.add_all([admin, donor])
+            db.session.commit()
 
-            conn.commit()
-            flash("Registration successful. Please login.")
+            # Seed Initial Events
+            events = [
+                Event(
+                    title="Bal Shiksha Ahara - ZP School Food Distribution",
+                    category="Nutrition",
+                    venue="Municipal School 102, Nerul, Navi Mumbai",
+                    date="2026-10-18",
+                    description="Distributing fresh hot nutritious breakfast and fruit kits to 450 municipal primary school kids.",
+                    status="upcoming",
+                    image_url="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&auto=format&fit=crop&q=80"
+                ),
+                Event(
+                    title="Winter Warmth: Blanket & Woolen Clothes Drive",
+                    category="Relief",
+                    venue="Navi Mumbai Slum Settlements",
+                    date="2026-11-05",
+                    description="Distributing thermal blankets and jackets to elderly residents and migrant families.",
+                    status="upcoming",
+                    image_url="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600&auto=format&fit=crop&q=80"
+                ),
+                Event(
+                    title="Swasthya Ahara: Community Kitchen Drive",
+                    category="Healthcare",
+                    venue="Govt Hospital Shelter, Vashi",
+                    date="2026-09-12",
+                    description="Served warm khichdi and fresh fruit to over 1,200 relatives of hospitalized patients.",
+                    status="completed",
+                    image_url="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=600&auto=format&fit=crop&q=80"
+                ),
+                Event(
+                    title="Education Kit Distribution - Mission Vidya",
+                    category="Education",
+                    venue="Turbhe Colony Learning Center",
+                    date="2026-08-20",
+                    description="Provided stationery kits, notebooks, and school bags to 300 underprivileged children.",
+                    status="completed",
+                    image_url="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80"
+                )
+            ]
+            db.session.add_all(events)
+            db.session.commit()
 
-            return redirect(url_for("login"))
+            # Seed Real-time Donations
+            donations = [
+                Donation(
+                    receipt_id="AS-8941AB12", user_id=donor.id, donor_name="Sahil Manohar Desale",
+                    category="Bal Shiksha Ahara", amount=5000.0, meals_funded=200,
+                    payment_method="UPI", transaction_ref="TXN-UPI9918231", pan_number="ABCDE1234F"
+                ),
+                Donation(
+                    receipt_id="AS-3321FA77", user_id=donor.id, donor_name="Dharamkumar Bhatia",
+                    category="Swasthya Ahara", amount=2500.0, meals_funded=100,
+                    payment_method="Card", transaction_ref="TXN-CRD4928172", pan_number="BKJPA9012K"
+                ),
+                Donation(
+                    receipt_id="AS-1092FF98", user_id=donor.id, donor_name="Pratap Merchant",
+                    category="Winter Blanket Drive", amount=12000.0, meals_funded=480,
+                    payment_method="NetBanking", transaction_ref="TXN-NB0029182", pan_number="PMMPA4412R"
+                )
+            ]
+            db.session.add_all(donations)
+            db.session.commit()
 
-        except sqlite3.IntegrityError:
-            flash("Email already registered.")
-
-        finally:
-            conn.close()
-
-    return render_template("register.html")
-
-
-# ---------------- DONATION PORTAL ----------------
-
-@app.route("/donate", methods=["GET", "POST"])
-def donate():
-
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
-    if session["role"] != "donor":
-        return redirect(url_for("admin"))
-
-    if request.method == "POST":
-
-        category = request.form["category"]
-        amount = request.form["amount"]
-        date = request.form["date"]
-
-        conn = get_db_connection()
-
-        conn.execute(
-            """
-            INSERT INTO donations
-            (donor_name, category, amount, date)
-            VALUES (?, ?, ?, ?)
-            """,
-            (session["name"], category, amount, date)
-        )
-
-        conn.commit()
-        conn.close()
-
-        flash("Donation submitted successfully!")
-
-        return redirect(url_for("donate"))
-
-    return render_template(
-        "donate.html",
-        name=session["name"]
-    )
-
-
-# ---------------- ADMIN DASHBOARD ----------------
-
-@app.route("/admin")
-def admin():
-
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
-    if session["role"] != "admin":
-        return redirect(url_for("donate"))
-
-    conn = get_db_connection()
-
-    donations = conn.execute(
-        "SELECT * FROM donations ORDER BY id DESC"
-    ).fetchall()
-
-    total_donations = conn.execute(
-        "SELECT COUNT(*) FROM donations"
-    ).fetchone()[0]
-
-    total_amount = conn.execute(
-        "SELECT COALESCE(SUM(amount), 0) FROM donations"
-    ).fetchone()[0]
-
-    conn.close()
-
-    return render_template(
-        "dashboard.html",
-        donations=donations,
-        total_donations=total_donations,
-        total_amount=total_amount
-    )
-
-
-# ---------------- LOGOUT ----------------
-
-@app.route("/logout")
-def logout():
-
-    session.clear()
-
-    return redirect(url_for("login"))
-
-
-# ---------------- MAIN ----------------
-
-if __name__ == "__main__":
-
-    init_db()
-
-    app.run(debug=True)
+if __name__ == '__main__':
+    seed_database()
+    app.run(debug=True, port=5000)

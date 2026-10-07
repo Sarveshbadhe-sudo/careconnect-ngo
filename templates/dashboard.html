@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <h1>Admin Dashboard</h1>
+
+    <p>Welcome, Administrator</p>
+
+    <div class="metrics">
+
+        <div class="card">
+            <h3>Total Donations</h3>
+            <h2>{{ total_donations }}</h2>
+        </div>
+
+        <div class="card">
+            <h3>Total Amount</h3>
+            <h2>₹{{ "%.2f"|format(total_amount) }}</h2>
+        </div>
+
+    </div>
+
+    <h2>Donation Analytics</h2>
+
+    <img
+        src="{{ url_for('static', filename='charts/donation_chart.png') }}"
+        alt="Donation Analytics Chart"
+        class="chart"
+    >
+
+    <h2>Donation Records</h2>
+
+    <table>
+
+        <tr>
+            <th>ID</th>
+            <th>Donor Name</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Date</th>
+        </tr>
+
+        {% for donation in donations %}
+
+        <tr>
+
+            <td>{{ donation["id"] }}</td>
+
+            <td>{{ donation["donor_name"] }}</td>
+
+            <td>{{ donation["category"] }}</td>
+
+            <td>₹{{ donation["amount"] }}</td>
+
+            <td>{{ donation["date"] }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+    <br>
+
+    <a href="{{ url_for('logout') }}">
+        <button>Logout</button>
+    </a>
+
+</div>
+
+</body>
+</html>

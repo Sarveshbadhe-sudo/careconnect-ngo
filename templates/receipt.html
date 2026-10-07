@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Receipt #{{ donation.receipt_id }} | Aashray Seva{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-16">
+    <div class="bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-xl text-slate-800">
+        <div class="flex justify-between items-start border-b border-slate-200 pb-6 mb-6">
+            <div>
+                <span class="text-2xl font-black text-teal-600">Aashray<span class="text-slate-800">Seva</span></span>
+                <p class="text-xs text-slate-500 font-semibold">Regd. Trust: 80G Exemption Validated</p>
+            </div>
+            <div class="text-right">
+                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">Payment Confirmed</span>
+                <p class="text-xs text-slate-500 font-mono mt-2">{{ donation.created_at.strftime('%d-%b-%Y %H:%M') }}</p>
+            </div>
+        </div>
+
+        <div class="text-center my-6">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Donated</span>
+            <div class="text-4xl font-black text-slate-900 mt-1">₹{{ donation.amount | format }}</div>
+            <p class="text-sm font-semibold text-teal-600 mt-1">Impact: {{ donation.meals_funded }} Nourishing Meals Provided</p>
+        </div>
+
+        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-3 text-sm mb-6">
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">Receipt Number:</span>
+                <span class="font-mono font-bold">{{ donation.receipt_id }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">Donor Name:</span>
+                <span class="font-bold">{{ donation.donor_name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">PAN ID:</span>
+                <span class="font-mono font-bold">{{ donation.pan_number if donation.pan_number else 'Not Provided' }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">Cause Sponsored:</span>
+                <span class="font-bold">{{ donation.category }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">Payment Mode:</span>
+                <span class="font-bold">{{ donation.payment_method }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500 font-medium">Transaction Reference:</span>
+                <span class="font-mono text-xs">{{ donation.transaction_ref }}</span>
+            </div>
+        </div>
+
+        <p class="text-xs text-slate-500 leading-relaxed text-center mb-8">
+            This donation qualifies for a 50% deduction under Section 80G of the Indian Income Tax Act. A formal PDF certificate has been compiled for your tax filing.
+        </p>
+
+        <div class="flex gap-4">
+            <a href="{{ url_for('donor.download_pdf', receipt_id=donation.receipt_id) }}" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl text-center shadow-md transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-file-pdf"></i> Download Official 80G PDF
+            </a>
+            <a href="{{ url_for('public_index') }}" class="border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold px-6 py-3.5 rounded-xl transition">
+                Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

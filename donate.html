@@ -1,68 +1,84 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Donate - Donation Management System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+{% extends 'base.html' %}
+{% block title %}Donate to Aashray Seva | 80G Tax Exemption{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-16">
+    <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-xl">
+        <div class="text-center mb-8">
+            <span class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Tax Exempt under 80G</span>
+            <h1 class="text-3xl font-black text-slate-800 mt-2">Make a Direct Impact</h1>
+            <p class="text-sm text-slate-500 mt-1">₹25 provides 1 nutritious hot meal to a child in need.</p>
+        </div>
 
-<body>
+        <form action="{{ url_for('donor.donate') }}" method="POST" id="donationForm" class="space-y-6">
+            <!-- Cause Selection -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Select Initiative</label>
+                <select name="category" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-teal-500">
+                    <option value="Bal Shiksha Ahara">Bal Shiksha Ahara (School Nutrition Programme)</option>
+                    <option value="Swasthya Ahara">Swasthya Ahara (Patient & Hospital Support)</option>
+                    <option value="Winter Blanket Drive">Winter Blanket & Warmth Relief</option>
+                    <option value="General Corpus">General Community Fund</option>
+                </select>
+            </div>
 
-<div class="container">
+            <!-- Quick Amount Chips -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Select Donation Amount (INR)</label>
+                <div class="grid grid-cols-4 gap-3 mb-3">
+                    <button type="button" onclick="setAmount(500)" class="amount-btn border-2 border-slate-200 hover:border-teal-500 font-bold py-2.5 rounded-xl text-sm transition">₹500</button>
+                    <button type="button" onclick="setAmount(1000)" class="amount-btn border-2 border-slate-200 hover:border-teal-500 font-bold py-2.5 rounded-xl text-sm transition">₹1,000</button>
+                    <button type="button" onclick="setAmount(2500)" class="amount-btn border-2 border-slate-200 hover:border-teal-500 font-bold py-2.5 rounded-xl text-sm transition">₹2,500</button>
+                    <button type="button" onclick="setAmount(5000)" class="amount-btn border-2 border-slate-200 hover:border-teal-500 font-bold py-2.5 rounded-xl text-sm transition">₹5,000</button>
+                </div>
+                <input type="number" id="customAmount" name="amount" min="100" value="1000" placeholder="Or enter custom amount in ₹" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-lg font-bold text-slate-800 focus:outline-teal-500">
+            </div>
 
-    <h1>Donation Portal</h1>
+            <!-- Dynamic Live Impact Pill -->
+            <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4 flex items-center gap-4">
+                <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center text-white text-xl">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-teal-700 font-bold uppercase tracking-wider">Your Direct Outcome</div>
+                    <div class="text-lg font-black text-teal-900" id="impactCounter">You will fund 40 warm meals</div>
+                </div>
+            </div>
 
-    <h3>Welcome, {{ name }}</h3>
+            <!-- Donor Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Donor Name</label>
+                    <input type="text" name="donor_name" value="{{ session.get('user_name', '') }}" required placeholder="e.g. Sahil Desale" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">PAN Number (For 80G Exemption)</label>
+                    <input type="text" name="pan_number" placeholder="e.g. ABCDE1234F" maxlength="10" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm uppercase">
+                </div>
+            </div>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <p class="message">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+            <!-- Payment Simulation -->
+            <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Simulate Payment Method</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <label class="border p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer border-teal-500 bg-teal-50">
+                        <input type="radio" name="payment_method" value="UPI" checked class="text-teal-600">
+                        <span class="text-xs font-bold">UPI / GPay / PhonePe</span>
+                    </label>
+                    <label class="border p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer border-slate-200">
+                        <input type="radio" name="payment_method" value="Credit/Debit Card" class="text-teal-600">
+                        <span class="text-xs font-bold">Card</span>
+                    </label>
+                    <label class="border p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer border-slate-200">
+                        <input type="radio" name="payment_method" value="NetBanking" class="text-teal-600">
+                        <span class="text-xs font-bold">Net Banking</span>
+                    </label>
+                </div>
+            </div>
 
-    <form method="POST">
-
-        <label>Donation Category</label>
-
-        <select name="category" required>
-            <option value="">Select Category</option>
-            <option value="Food">Food</option>
-            <option value="Education">Education</option>
-            <option value="Healthcare">Healthcare</option>
-            <option value="Clothing">Clothing</option>
-            <option value="Disaster Relief">Disaster Relief</option>
-        </select>
-
-        <label>Donation Amount</label>
-
-        <input
-            type="number"
-            name="amount"
-            min="1"
-            step="0.01"
-            required
-        >
-
-        <label>Date</label>
-
-        <input
-            type="date"
-            name="date"
-            required
-        >
-
-        <button type="submit">Submit Donation</button>
-
-    </form>
-
-    <br>
-
-    <a href="{{ url_for('logout') }}">
-        <button>Logout</button>
-    </a>
-
+            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-teal-500/20 text-lg transition">
+                Proceed & Generate 80G Receipt
+            </button>
+        </form>
+    </div>
 </div>
-
-</body>
-</html>
+{% endblock %}
