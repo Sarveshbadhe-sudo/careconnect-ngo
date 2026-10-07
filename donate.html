@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Donate - Donation Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Donation Portal</h1>
+
+    <h3>Welcome, {{ name }}</h3>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <p class="message">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+
+        <label>Donation Category</label>
+
+        <select name="category" required>
+            <option value="">Select Category</option>
+            <option value="Food">Food</option>
+            <option value="Education">Education</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Disaster Relief">Disaster Relief</option>
+        </select>
+
+        <label>Donation Amount</label>
+
+        <input
+            type="number"
+            name="amount"
+            min="1"
+            step="0.01"
+            required
+        >
+
+        <label>Date</label>
+
+        <input
+            type="date"
+            name="date"
+            required
+        >
+
+        <button type="submit">Submit Donation</button>
+
+    </form>
+
+    <br>
+
+    <a href="{{ url_for('logout') }}">
+        <button>Logout</button>
+    </a>
+
+</div>
+
+</body>
+</html>
