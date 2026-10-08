@@ -1,84 +1,185 @@
 {% extends 'base.html' %}
-{% block title %}Donate to Aashray Seva | 80G Tax Exemption{% endblock %}
+{% block title %}Donate | Aashray Seva{% endblock %}
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 py-16">
-    <div class="bg-white p-8 md:p-10 rounded-3xl border border-slate-200 shadow-xl">
-        <div class="text-center mb-8">
-            <span class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Tax Exempt under 80G</span>
-            <h1 class="text-3xl font-black text-slate-800 mt-2">Make a Direct Impact</h1>
-            <p class="text-sm text-slate-500 mt-1">₹25 provides 1 nutritious hot meal to a child in need.</p>
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+        <div class="mb-6">
+            <span class="bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Direct Contribution</span>
+            <h2 class="text-3xl font-black text-slate-800 mt-2">Empower with Nutrition</h2>
+            <p class="text-xs text-slate-500 mt-1">Every ₹25 directly cooks and serves 1 wholesome meal. Eligible for 50% Section 80G tax rebate.</p>
         </div>
 
-        <form action="{{ url_for('donor.donate') }}" method="POST" id="donationForm" class="space-y-6">
-            <!-- Cause Selection -->
+        <form action="{{ url_for('donate') }}" method="POST" id="donationForm" class="space-y-6">
+            <!-- Cause Category -->
             <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Select Initiative</label>
-                <select name="category" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-teal-500">
-                    <option value="Bal Shiksha Ahara">Bal Shiksha Ahara (School Nutrition Programme)</option>
-                    <option value="Swasthya Ahara">Swasthya Ahara (Patient & Hospital Support)</option>
-                    <option value="Winter Blanket Drive">Winter Blanket & Warmth Relief</option>
-                    <option value="General Corpus">General Community Fund</option>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Select Campaign Initiative</label>
+                <select name="category" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-teal-500">
+                    <option value="Bal Shiksha Ahara">Bal Shiksha Ahara (Municipal School Meals)</option>
+                    <option value="Swasthya Ahara">Swasthya Ahara (Patient & Hospital Care)</option>
+                    <option value="Winter Blanket Drive">Winter Warmth Relief & Blankets</option>
+                    <option value="General Corpus">General Corpus & Emergency Fund</option>
                 </select>
             </div>
 
-            <!-- Quick Amount Chips -->
+            <!-- Amount Selection Buttons -->
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Select Donation Amount (INR)</label>
-                <div class="grid grid-cols-4 gap-3 mb-3">
-                    <button type="button" onclick="setAmount(500)" class="amount-btn border-2 border-slate-200 hover:border-teal-500 font-bold py-2.5 rounded-xl text-sm transition">₹500</button>
-                    <button type="button" onclick="setAmount(1000)" class="amount-btn border-2 border-slate-200 hover:border-teal-500 font-bold py-2.5 rounded-xl text-sm transition">₹1,000</button>
-                    <button type="button" onclick="setAmount(2500)" class="amount-btn border-2 border-slate-200 hover:border-teal-500 font-bold py-2.5 rounded-xl text-sm transition">₹2,500</button>
-                    <button type="button" onclick="setAmount(5000)" class="amount-btn border-2 border-slate-200 hover:border-teal-500 font-bold py-2.5 rounded-xl text-sm transition">₹5,000</button>
+                <div class="grid grid-cols-4 gap-2 mb-3">
+                    <button type="button" onclick="setAmount(500)" class="amount-btn border border-slate-200 rounded-xl py-2.5 font-bold text-sm text-slate-700 hover:border-teal-500 hover:text-teal-600 transition">₹500</button>
+                    <button type="button" onclick="setAmount(1000)" class="amount-btn border border-slate-200 rounded-xl py-2.5 font-bold text-sm text-slate-700 hover:border-teal-500 hover:text-teal-600 transition">₹1,000</button>
+                    <button type="button" onclick="setAmount(2500)" class="amount-btn border border-slate-200 rounded-xl py-2.5 font-bold text-sm text-slate-700 hover:border-teal-500 hover:text-teal-600 transition">₹2,500</button>
+                    <button type="button" onclick="setAmount(5000)" class="amount-btn border border-slate-200 rounded-xl py-2.5 font-bold text-sm text-slate-700 hover:border-teal-500 hover:text-teal-600 transition">₹5,000</button>
                 </div>
-                <input type="number" id="customAmount" name="amount" min="100" value="1000" placeholder="Or enter custom amount in ₹" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-lg font-bold text-slate-800 focus:outline-teal-500">
+                <div class="relative">
+                    <span class="absolute left-4 top-2.5 font-bold text-slate-400 text-sm">₹</span>
+                    <input type="number" id="customAmount" name="amount" value="1000" min="25" step="25" required 
+                           oninput="updateImpact(this.value)"
+                           class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-4 py-2.5 text-base font-bold text-slate-800 focus:outline-teal-500">
+                </div>
             </div>
 
-            <!-- Dynamic Live Impact Pill -->
-            <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4 flex items-center gap-4">
-                <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center text-white text-xl">
+            <!-- Meal Calculator Widget -->
+            <div class="bg-teal-50/70 border border-teal-200 p-4 rounded-2xl flex items-center gap-4">
+                <div class="w-12 h-12 bg-teal-600 text-white rounded-xl flex items-center justify-center text-xl shrink-0">
                     <i class="fa-solid fa-utensils"></i>
                 </div>
                 <div>
-                    <div class="text-xs text-teal-700 font-bold uppercase tracking-wider">Your Direct Outcome</div>
-                    <div class="text-lg font-black text-teal-900" id="impactCounter">You will fund 40 warm meals</div>
+                    <span class="text-[10px] font-bold text-teal-700 uppercase tracking-wider block">Your Direct Outcome</span>
+                    <div id="impactCounter" class="text-base font-extrabold text-teal-950">You will fund 40 warm meals</div>
                 </div>
             </div>
 
-            <!-- Donor Info -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Donor Personal & 80G Tax Details -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Donor Name</label>
-                    <input type="text" name="donor_name" value="{{ session.get('user_name', '') }}" required placeholder="e.g. Sahil Desale" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Donor Name</label>
+                    <input type="text" name="donor_name" required value="{{ session.get('user_name', '') }}" placeholder="Sahil Manohar Desale"
+                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 text-sm focus:outline-teal-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">PAN Number (For 80G Exemption)</label>
-                    <input type="text" name="pan_number" placeholder="e.g. ABCDE1234F" maxlength="10" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm uppercase">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">PAN Number (For 80G Exemption)</label>
+                    <input type="text" name="pan_number" maxlength="10" placeholder="ABCDE1234F"
+                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2 text-sm uppercase focus:outline-teal-500">
                 </div>
             </div>
 
-            <!-- Payment Simulation -->
+            <!-- Payment Methods Radio Selector -->
             <div>
-                <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Simulate Payment Method</label>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Simulate Payment Method</label>
                 <div class="grid grid-cols-3 gap-3">
-                    <label class="border p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer border-teal-500 bg-teal-50">
-                        <input type="radio" name="payment_method" value="UPI" checked class="text-teal-600">
-                        <span class="text-xs font-bold">UPI / GPay / PhonePe</span>
+                    <label class="payment-option cursor-pointer border border-teal-500 bg-teal-50/40 p-3 rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-slate-700 transition" onclick="selectPaymentMode('UPI')">
+                        <input type="radio" name="payment_method" value="UPI" checked class="hidden">
+                        <i class="fa-solid fa-qrcode text-teal-600"></i> UPI / QR
                     </label>
-                    <label class="border p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer border-slate-200">
-                        <input type="radio" name="payment_method" value="Credit/Debit Card" class="text-teal-600">
-                        <span class="text-xs font-bold">Card</span>
+                    <label class="payment-option cursor-pointer border border-slate-200 p-3 rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-slate-700 transition" onclick="selectPaymentMode('Card')">
+                        <input type="radio" name="payment_method" value="Card" class="hidden">
+                        <i class="fa-regular fa-credit-card text-slate-600"></i> Card
                     </label>
-                    <label class="border p-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer border-slate-200">
-                        <input type="radio" name="payment_method" value="NetBanking" class="text-teal-600">
-                        <span class="text-xs font-bold">Net Banking</span>
+                    <label class="payment-option cursor-pointer border border-slate-200 p-3 rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-slate-700 transition" onclick="selectPaymentMode('NetBanking')">
+                        <input type="radio" name="payment_method" value="NetBanking" class="hidden">
+                        <i class="fa-solid fa-building-columns text-slate-600"></i> Net Banking
                     </label>
                 </div>
             </div>
 
-            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-teal-500/20 text-lg transition">
-                Proceed & Generate 80G Receipt
+            <!-- DYNAMIC SECTION 1: UPI & QR Code -->
+            <div id="upiSection" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                <span class="text-xs font-bold text-slate-700 block mb-1">Scan & Pay using any UPI App</span>
+                <p class="text-[11px] text-slate-400 mb-3">Google Pay, PhonePe, Paytm, BHIM</p>
+                <div class="inline-block p-3 bg-white rounded-2xl shadow-sm border border-slate-200">
+                    <img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=aashrayseva@upi%26pn=AashraySeva%26am=1000%26cu=INR" 
+                         alt="UPI QR Code" class="w-36 h-36 mx-auto rounded-lg">
+                </div>
+                <div class="mt-2 text-xs font-mono text-teal-700 font-bold">UPI ID: aashrayseva@upi</div>
+            </div>
+
+            <!-- DYNAMIC SECTION 2: Debit / Credit Card Fields -->
+            <div id="cardSection" class="hidden p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
+                    <span>Card Information</span>
+                    <span class="text-slate-400 font-normal"><i class="fa-solid fa-lock text-[10px]"></i> 256-Bit Encrypted Simulation</span>
+                </div>
+                <div>
+                    <input type="text" maxlength="19" placeholder="4532 •••• •••• 8821" 
+                           class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2 text-xs font-mono tracking-wider focus:outline-teal-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" maxlength="5" placeholder="MM / YY (e.g. 10/28)" 
+                           class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2 text-xs font-mono focus:outline-teal-500">
+                    <input type="password" maxlength="4" placeholder="CVV / CVC (e.g. 892)" 
+                           class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2 text-xs font-mono focus:outline-teal-500">
+                </div>
+            </div>
+
+            <!-- DYNAMIC SECTION 3: NetBanking Bank Select -->
+            <div id="netBankingSection" class="hidden p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                <label class="block text-xs font-bold text-slate-700">Choose Your Bank</label>
+                <select class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-800 focus:outline-teal-500">
+                    <option value="HDFC">HDFC Bank</option>
+                    <option value="SBI">State Bank of India (SBI)</option>
+                    <option value="ICICI">ICICI Bank</option>
+                    <option value="AXIS">Axis Bank</option>
+                    <option value="KOTAK">Kotak Mahindra Bank</option>
+                    <option value="PNB">Punjab National Bank</option>
+                    <option value="BOB">Bank of Baroda</option>
+                </select>
+                <p class="text-[11px] text-slate-400">You will be securely routed to your bank's authentication gateway.</p>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" 
+                    class="w-full bg-teal-600 hover:bg-teal-700 text-white font-black py-4 rounded-2xl transition duration-200 shadow-lg shadow-teal-600/20 text-base flex items-center justify-center gap-2">
+                <i class="fa-solid fa-shield-heart"></i> Proceed & Generate 80G Receipt
             </button>
         </form>
     </div>
 </div>
+
+<script>
+function updateImpact(amount) {
+    const val = parseFloat(amount) || 0;
+    const meals = Math.floor(val / 25);
+    const counter = document.getElementById('impactCounter');
+    if (counter) {
+        counter.innerText = `You will fund ${meals.toLocaleString()} warm meals`;
+    }
+    // Update live QR Code data parameter with amount
+    const qrImg = document.getElementById('qrImage');
+    if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=aashrayseva@upi%26pn=AashraySeva%26am=${val}%26cu=INR`;
+    }
+}
+
+function setAmount(val) {
+    const customInput = document.getElementById('customAmount');
+    if (customInput) {
+        customInput.value = val;
+        updateImpact(val);
+    }
+}
+
+function selectPaymentMode(mode) {
+    // 1. Toggle dynamic sections
+    document.getElementById('upiSection').classList.toggle('hidden', mode !== 'UPI');
+    document.getElementById('cardSection').classList.toggle('hidden', mode !== 'Card');
+    document.getElementById('netBankingSection').classList.toggle('hidden', mode !== 'NetBanking');
+
+    // 2. Update radio input selection
+    const radios = document.querySelectorAll('input[name="payment_method"]');
+    radios.forEach(radio => {
+        radio.checked = (radio.value === mode);
+    });
+
+    // 3. Update styling of selection cards
+    const labels = document.querySelectorAll('.payment-option');
+    labels.forEach(lbl => {
+        const input = lbl.querySelector('input');
+        if (input && input.value === mode) {
+            lbl.className = "payment-option cursor-pointer border border-teal-500 bg-teal-50/40 p-3 rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-slate-700 transition";
+        } else {
+            lbl.className = "payment-option cursor-pointer border border-slate-200 p-3 rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-slate-700 transition";
+        }
+    });
+}
+</script>
 {% endblock %}

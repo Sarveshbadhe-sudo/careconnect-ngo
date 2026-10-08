@@ -8,7 +8,7 @@
             <p class="text-slate-500 text-sm mt-1">Live overview of collections, tax certificates, and event schedules.</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ url_for('admin.export_csv') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md transition flex items-center gap-2">
+            <a href="{{ url_for('export_csv') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md transition flex items-center gap-2">
                 <i class="fa-solid fa-file-csv"></i> Export Donations (CSV)
             </a>
             <button onclick="document.getElementById('addEventModal').classList.remove('hidden')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md transition flex items-center gap-2">
@@ -21,7 +21,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Gross Contributions</span>
-            <div class="text-3xl font-black text-slate-800 mt-2">₹{{ total_funds | format }}</div>
+            <div class="text-3xl font-black text-slate-800 mt-2">₹{{ total_funds | int }}</div>
             <span class="text-xs text-emerald-600 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> 100% Tax Compliant</span>
         </div>
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -75,7 +75,7 @@
                             <td class="p-4 text-xs">{{ d.payment_method }}</td>
                             <td class="p-4 text-xs text-slate-400">{{ d.created_at.strftime('%d-%b-%Y') }}</td>
                             <td class="p-4 text-center">
-                                <a href="{{ url_for('donor.download_pdf', receipt_id=d.receipt_id) }}" class="text-teal-600 hover:text-teal-800 font-bold text-xs"><i class="fa-solid fa-download"></i> PDF</a>
+                                <a href="{{ url_for('download_pdf', receipt_id=d.receipt_id) }}" class="text-teal-600 hover:text-teal-800 font-bold text-xs"><i class="fa-solid fa-download"></i> PDF</a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -96,7 +96,7 @@
                                 {% if ev.status == 'upcoming' %} bg-teal-100 text-teal-800 {% else %} bg-slate-100 text-slate-700 {% endif %}">
                                 {{ ev.status }}
                             </span>
-                            <form action="{{ url_for('admin.delete_event', event_id=ev.id) }}" method="POST">
+                            <form action="{{ url_for('delete_event', event_id=ev.id) }}" method="POST">
                                 <button type="submit" class="text-rose-500 hover:text-rose-700 text-xs font-bold">&times; Remove</button>
                             </form>
                         </div>
@@ -116,7 +116,7 @@
             <h3 class="font-bold text-lg text-slate-800">Add Campaign or Drive</h3>
             <button onclick="document.getElementById('addEventModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
         </div>
-        <form action="{{ url_for('admin.add_event') }}" method="POST" class="space-y-3">
+        <form action="{{ url_for('add_event') }}" method="POST" class="space-y-3">
             <input type="text" name="title" required placeholder="Event Title" class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm">
             <input type="text" name="category" required placeholder="Category (e.g. Nutrition, Relief)" class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm">
             <input type="text" name="venue" required placeholder="Venue / Location" class="w-full bg-slate-50 border p-2.5 rounded-xl text-sm">
@@ -132,7 +132,7 @@
     </div>
 </div>
 
-<!-- Chart.js Initialization Script -->
+<!-- Chart.js Script -->
 <script>
     const ctx = document.getElementById('categoryChart').getContext('2d');
     new Chart(ctx, {

@@ -1,26 +1,120 @@
 {% extends 'base.html' %}
 {% block title %}Sign In | Aashray Seva{% endblock %}
 {% block content %}
-<div class="max-w-md mx-auto px-4 py-20">
-    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
-        <h2 class="text-2xl font-black text-slate-800 text-center mb-6">Access Portal</h2>
-        <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
-            <div>
-                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Email Address</label>
-                <input type="email" name="email" required placeholder="donor@gmail.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-teal-500">
+<!-- Full-Bleed Zero Gap NGO Backdrop Container -->
+<div class="relative min-h-[calc(100vh-80px)] -mt-4 flex items-center justify-center py-16 px-4 bg-slate-950 overflow-hidden">
+    <!-- Local Static NGO Background Image -->
+    <div class="absolute inset-0 z-0">
+        <img src="{{ url_for('static', filename='img.png') }}" 
+             alt="Aashray Seva Community Distribution" 
+             class="w-full h-full object-cover object-[center_25%] filter brightness-[0.55] contrast-[1.08] select-none">
+        <!-- Smooth Cinematic Gradient Vignette -->
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-teal-950/60 mix-blend-multiply"></div>
+    </div>
+
+    <!-- Glassmorphic Login Card -->
+    <div class="relative z-10 w-full max-w-md bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-white/30 shadow-2xl">
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-teal-50 border border-teal-200 rounded-full text-[11px] font-bold text-teal-800 uppercase tracking-widest mb-3">
+                <i class="fa-solid fa-hands-holding-circle text-teal-600"></i> Aashray Seva Portal
             </div>
-            <div>
-                <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Password</label>
-                <input type="password" name="password" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-teal-500">
-            </div>
-            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl transition">Sign In</button>
-        </form>
-        <div class="mt-6 text-center text-xs text-slate-500">
-            New to Aashray Seva? <a href="{{ url_for('auth.register') }}" class="text-teal-600 font-bold hover:underline">Register here</a>
+            <h2 class="text-2xl font-black text-slate-800 tracking-tight" id="loginHeader">Donor Portal Sign In</h2>
+            <p class="text-xs text-slate-500 mt-1" id="loginSubtext">Access your personal donation log & 80G tax certificates</p>
         </div>
-        <div class="mt-4 p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 text-center border border-slate-100">
-            <b>Admin Demo Credentials:</b> admin@aashray.ngo / admin123
+
+        <!-- Role Toggle Pills -->
+        <div class="flex bg-slate-100 p-1 rounded-2xl mb-6 border border-slate-200">
+            <button type="button" id="userTabBtn" onclick="switchRole('user')" 
+                    class="flex-1 py-2.5 rounded-xl font-bold text-xs transition duration-200 bg-white text-teal-700 shadow-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-heart text-teal-500"></i> User / Donor
+            </button>
+            <button type="button" id="adminTabBtn" onclick="switchRole('admin')" 
+                    class="flex-1 py-2.5 rounded-xl font-bold text-xs transition duration-200 text-slate-500 hover:text-slate-800 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-shield-halved"></i> Administrator
+            </button>
+        </div>
+
+        <form action="{{ url_for('login') }}" method="POST" class="space-y-4">
+            <input type="hidden" name="login_role" id="selectedRole" value="user">
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" id="emailLabel">Registered Email</label>
+                <div class="relative">
+                    <span class="absolute left-3.5 top-3 text-slate-400 text-sm"><i class="fa-regular fa-envelope"></i></span>
+                    <input type="email" name="email" id="emailInput" required 
+                           placeholder="donor@gmail.com" 
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
+                <div class="relative">
+                    <span class="absolute left-3.5 top-3 text-slate-400 text-sm"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" name="password" required 
+                           placeholder="••••••••" 
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:border-teal-600 focus:bg-white transition">
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" 
+                    class="w-full bg-teal-600 hover:bg-teal-700 text-white font-black py-3.5 rounded-xl transition duration-200 shadow-lg shadow-teal-700/25 text-sm flex items-center justify-center gap-2">
+                <span>Sign In as Donor</span> <i class="fa-solid fa-arrow-right-long text-xs"></i>
+            </button>
+        </form>
+
+        <div id="registerPrompt" class="mt-6 text-center text-xs text-slate-500">
+            First time donor? <a href="{{ url_for('register') }}" class="text-teal-600 font-bold hover:underline">Create a donor account</a>
+        </div>
+
         </div>
     </div>
 </div>
+
+<script>
+function switchRole(role) {
+    const roleInput = document.getElementById('selectedRole');
+    const userBtn = document.getElementById('userTabBtn');
+    const adminBtn = document.getElementById('adminTabBtn');
+    const header = document.getElementById('loginHeader');
+    const subtext = document.getElementById('loginSubtext');
+    const submitBtn = document.getElementById('submitBtn');
+    const emailLabel = document.getElementById('emailLabel');
+    const emailInput = document.getElementById('emailInput');
+    const registerPrompt = document.getElementById('registerPrompt');
+    const hint = document.getElementById('credentialsHint');
+
+    roleInput.value = role;
+
+    if (role === 'admin') {
+        adminBtn.className = "flex-1 py-2.5 rounded-xl font-bold text-xs transition duration-200 bg-slate-900 text-white shadow-sm flex items-center justify-center gap-2";
+        userBtn.className = "flex-1 py-2.5 rounded-xl font-bold text-xs transition duration-200 text-slate-500 hover:text-slate-800 flex items-center justify-center gap-2";
+        
+        header.innerText = "Administrative Sign In";
+        subtext.innerText = "Authorized access for campaign & fund management";
+        emailLabel.innerText = "Admin Portal Email";
+        emailInput.placeholder = "admin@aashray.ngo";
+        
+        submitBtn.className = "w-full bg-slate-900 hover:bg-black text-white font-black py-3.5 rounded-xl transition duration-200 shadow-lg shadow-slate-900/25 text-sm flex items-center justify-center gap-2";
+        submitBtn.innerHTML = '<span>Sign In to Admin Console</span> <i class="fa-solid fa-shield-halved text-xs"></i>';
+        
+        registerPrompt.style.display = "none";
+        hint.innerHTML = '<span class="font-bold text-slate-700">Admin Access:</span> <code class="text-slate-900 font-mono font-bold">admin@aashray.ngo</code> / <code class="text-slate-900 font-mono font-bold">admin123</code>';
+    } else {
+        userBtn.className = "flex-1 py-2.5 rounded-xl font-bold text-xs transition duration-200 bg-white text-teal-700 shadow-sm flex items-center justify-center gap-2";
+        adminBtn.className = "flex-1 py-2.5 rounded-xl font-bold text-xs transition duration-200 text-slate-500 hover:text-slate-800 flex items-center justify-center gap-2";
+        
+        header.innerText = "Donor Portal Sign In";
+        subtext.innerText = "Access your personal donation log & 80G tax certificates";
+        emailLabel.innerText = "Registered Email";
+        emailInput.placeholder = "donor@gmail.com";
+        
+        submitBtn.className = "w-full bg-teal-600 hover:bg-teal-700 text-white font-black py-3.5 rounded-xl transition duration-200 shadow-lg shadow-teal-700/25 text-sm flex items-center justify-center gap-2";
+        submitBtn.innerHTML = '<span>Sign In as Donor</span> <i class="fa-solid fa-arrow-right-long text-xs"></i>';
+        
+        registerPrompt.style.display = "block";
+        hint.innerHTML = '<span class="font-bold text-slate-700">Donor Access:</span> <code class="text-teal-700 font-mono">sahil@gmail.com</code> / <code class="text-teal-700 font-mono">sahil123</code>';
+    }
+}
+</script>
 {% endblock %}
