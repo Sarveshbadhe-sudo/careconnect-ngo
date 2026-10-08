@@ -60,7 +60,7 @@ def donate():
 
     return render_template('donate.html')
 
-@donor_bp.route('/receipt/<receipt_id>/pdf', endpoint='download_pdf')
+@donor_bp.route('/receipt/<receipt_id>')
 def receipt(receipt_id):
     donation = Donation.query.filter_by(receipt_id=receipt_id).first_or_404()
     return render_template('receipt.html', donation=donation)
