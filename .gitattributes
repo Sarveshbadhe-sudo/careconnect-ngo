@@ -1,0 +1,6 @@
+# Mark HTML templates as vendored so GitHub ignores them in language stats
+templates/** linguist-vendored
+*.html linguist-vendored
+
+# Mark static assets as documentation / vendored
+static/** linguist-vendored
